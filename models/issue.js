@@ -16,6 +16,8 @@ var issueSchema = new mongoose.Schema({
   },
   return_date: {
     type: Date,
+    default: Date.now() + 15 * 24 * 60 * 60 * 1000,
+    required: false,
   },
   active: {
     type: Boolean,

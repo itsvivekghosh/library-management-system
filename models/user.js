@@ -5,6 +5,11 @@ var userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   username: {
     type: String,
     required: true,
@@ -18,6 +23,10 @@ var userSchema = new mongoose.Schema({
 
 userSchema.statics.findByUsername = function (username, callback) {
   return this.find({ username: username }, callback);
+};
+
+userSchema.statics.findByEmail = function (email, callback) {
+  return this.find({ email: email }, callback);
 };
 
 userSchema.statics.findByName = function (name, callback) {
