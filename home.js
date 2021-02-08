@@ -26,4 +26,3 @@ app.use(serveStatic("public", { index: ["home.html"] }));
 app.listen(PORT, HOSTNAME, function () {
   console.log(`Running on Port: ${PORT}`);
 });
-// console.log("Hello");
