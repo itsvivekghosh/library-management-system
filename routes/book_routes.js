@@ -1,8 +1,8 @@
-var mongoose = require("mongoose");
 var express = require("express");
+const multer = require("multer");
 var router = express.Router();
-
 var Book = require("../models/books");
+var path = require("path");
 
 router.get("/", function (req, res) {
   var query = req.query;
@@ -24,6 +24,29 @@ router.get("/:id", function (req, res) {
   Book.findById(req.params.id, resCb.bind({ res: res }));
 });
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+
+  // By default, multer removes file extensions so let's add them back
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const imageFilter = function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = "Only image files are allowed!";
+    return cb(new Error("Only image files are allowed!"), false);
+  }
+  cb(null, true);
+};
+
 router.post("/", function (req, res) {
   var book = new Book(req.body);
   book.save(function (error) {
@@ -31,6 +54,22 @@ router.post("/", function (req, res) {
       return res.send(error);
     }
     res.send({ message: "Book Added Successfully!!" });
+  });
+});
+
+const upload = multer({
+  dest: "uploads/",
+  fileFilter: imageFilter,
+  storage: storage,
+  limits: { fileSize: 1000000 },
+}).single("cover");
+
+router.post("/upload", (req, res) => {
+  upload(req, res, (err) => {
+    if (err) {
+      res.status(400).send("Something went wrong!");
+    }
+    res.send(req.file);
   });
 });
 
@@ -51,6 +90,19 @@ router.post("/:id", function (req, res) {
       res.send({ message: "Book Updated!!" });
     });
   });
+});
+
+router.delete("/:id/delete/", (req, res) => {
+  const bookId = req.params.id;
+  Book.findOneAndRemove(bookId)
+    .exec()
+    .then((doc) => {
+      if (!doc) return res.status(404).end();
+      return res.send({ message: "Book Deleted!!" });
+    })
+    .catch((err) => {
+      return res.send({ error: err });
+    });
 });
 
 function resCb(err, data) {

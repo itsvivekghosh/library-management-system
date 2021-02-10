@@ -1,7 +1,5 @@
-var mongoose = require("mongoose");
 var express = require("express");
 var router = express.Router();
-
 var User = require("./../models/user");
 
 router.get("/", function (req, res) {
@@ -49,6 +47,19 @@ router.post("/:id", function (req, res) {
       res.send({ message: "User Updated!!" });
     });
   });
+});
+
+router.delete("/:id/delete/", (req, res) => {
+  const userId = req.params.id;
+  User.findOneAndRemove(userId)
+    .exec()
+    .then((doc) => {
+      if (!doc) return res.status(404).end();
+      return res.send({ message: "User Deleted!!" });
+    })
+    .catch((err) => {
+      return res.send({ error: err });
+    });
 });
 
 function resCb(err, data) {

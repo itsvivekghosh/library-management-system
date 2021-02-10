@@ -18,6 +18,10 @@ var bookSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
   },
+  cover: {
+    type: Buffer,
+    contentType: String,
+  },
 });
 
 bookSchema.statics.findByTitle = function (title, callback) {
