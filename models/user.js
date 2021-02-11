@@ -19,6 +19,13 @@ var userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profileImage: {
+    type: String,
+    required: false,
+  },
+  profileImagePath: {
+    type: String,
+  },
 });
 
 userSchema.statics.findByUsername = function (username, callback) {

@@ -2,7 +2,9 @@ var mongoose = require("mongoose");
 var express = require("express");
 var serveStatic = require("serve-static");
 require("dotenv/config");
+var router = express.Router();
 
+router.use(express.static(__dirname + "./public/"));
 var app = express();
 
 var bodyParser = require("body-parser");

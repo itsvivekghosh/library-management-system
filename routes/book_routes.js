@@ -24,11 +24,8 @@ router.get("/:id", function (req, res) {
   Book.findById(req.params.id, resCb.bind({ res: res }));
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-
+const Storage = multer.diskStorage({
+  destination: "./public/uploads/covers/",
   // By default, multer removes file extensions so let's add them back
   filename: function (req, file, cb) {
     cb(
@@ -47,29 +44,26 @@ const imageFilter = function (req, file, cb) {
   cb(null, true);
 };
 
-router.post("/", function (req, res) {
-  var book = new Book(req.body);
+const upload = multer({
+  fileFilter: imageFilter,
+  storage: Storage,
+  limits: { fileSize: 1000000 },
+}).single("cover");
+
+router.post("/", upload, function (req, res) {
+  var book = new Book({
+    title: req.body.title,
+    author: req.body.author,
+    isbn: req.body.isbn,
+    coverPath: "covers/" + req.file.filename,
+    coverName: req.file.filename,
+    issued: req.body.issued,
+  });
   book.save(function (error) {
     if (error) {
       return res.send(error);
     }
     res.send({ message: "Book Added Successfully!!" });
-  });
-});
-
-const upload = multer({
-  dest: "uploads/",
-  fileFilter: imageFilter,
-  storage: storage,
-  limits: { fileSize: 1000000 },
-}).single("cover");
-
-router.post("/upload", (req, res) => {
-  upload(req, res, (err) => {
-    if (err) {
-      res.status(400).send("Something went wrong!");
-    }
-    res.send(req.file);
   });
 });
 

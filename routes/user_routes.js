@@ -1,6 +1,34 @@
 var express = require("express");
 var router = express.Router();
+var multer = require("multer");
 var User = require("./../models/user");
+var path = require("path");
+
+const Storage = multer.diskStorage({
+  destination: "./public/uploads/profile/",
+  // By default, multer removes file extensions so let's add them back
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const imageFilter = function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = "Only image files are allowed!";
+    return cb(new Error("Only image files are allowed!"), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({
+  fileFilter: imageFilter,
+  storage: Storage,
+  limits: { fileSize: 1000000 },
+}).single("profileImage");
 
 router.get("/", function (req, res) {
   var query = req.query;
@@ -22,8 +50,15 @@ router.post("/login", function (req, res) {
   console.log(User.login(username, password, cb));
 });
 
-router.post("/signup", function (req, res) {
-  var user = new User(req.body);
+router.post("/signup", upload, function (req, res) {
+  var user = new User({
+    name: req.body.name,
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    profileImage: req.file.filename,
+    profileImagePath: "profile/" + req.file.filename,
+  });
   user.save(function (err) {
     if (err) {
       return res.send(err);

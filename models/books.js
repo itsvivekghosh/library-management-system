@@ -18,9 +18,11 @@ var bookSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
   },
-  cover: {
-    type: Buffer,
-    contentType: String,
+  coverName: {
+    type: String,
+  },
+  coverPath: {
+    type: String,
   },
 });
 
