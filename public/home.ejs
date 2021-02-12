@@ -1,0 +1,19 @@
+<div>
+    <h2 class="page-header">Recently Added Books: </h2>
+    <div>
+        <%- include("containers/partials/booksGridView.ejs", {
+            books: books,
+            large: true
+        }) %>
+    </div>
+</div>
+
+<div>
+    <h2 class="page-header">Recent Authors: </h2>
+    <div>
+        <%- include("containers/partials/authorsGridView.ejs", {
+            authors: authors,
+            large: true,
+        }) %>
+    </div>
+</div>

@@ -7,7 +7,7 @@ var bookSchema = new mongoose.Schema({
     unique: true,
   },
   author: {
-    type: String,
+    type: mongoose.Schema.ObjectId, // Author ID
     required: true,
   },
   isbn: {

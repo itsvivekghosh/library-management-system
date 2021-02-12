@@ -50,7 +50,7 @@ const upload = multer({
   limits: { fileSize: 1000000 },
 }).single("cover");
 
-router.post("/", upload, function (req, res) {
+router.post("/add", upload, function (req, res) {
   var book = new Book({
     title: req.body.title,
     author: req.body.author,

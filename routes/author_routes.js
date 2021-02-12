@@ -1,13 +1,13 @@
 var express = require("express");
 var router = express.Router();
 var multer = require("multer");
-var User = require("./../models/user");
+var Author = require("./../models/author");
 var path = require("path");
 const bcrypt = require("bcrypt");
 require("dotenv/config");
 
 const Storage = multer.diskStorage({
-  destination: "./public/uploads/profile/user",
+  destination: "./public/uploads/profile/author/",
   // By default, multer removes file extensions so let's add them back
   filename: function (req, file, cb) {
     cb(
@@ -32,16 +32,43 @@ const upload = multer({
   limits: { fileSize: 1000000 },
 }).single("profileImage");
 
-router.get("/", function (req, res) {
+router.get("/", (req, res) => {
   var query = req.query;
   var cb = resCb.bind({ res: res });
   if (query.hasOwnProperty("name")) {
-    User.findByName(query.name, cb);
+    Author.findByName(query.name, cb);
   } else if (query.hasOwnProperty("username")) {
-    User.findByUsername(query.username, cb);
+    Author.findByUsername(query.username, cb);
   } else {
-    User.find(cb);
+    Author.find(cb);
   }
+});
+
+router.post("/signup", upload, async function (req, res) {
+  if (!(req.body.email && req.body.password)) {
+    return res.status(400).send({ error: "Data not formatted properly" });
+  }
+
+  var user = new Author({
+    authorName: req.body.authorName,
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    profileImage: req.file.filename,
+    profileImagePath: "profile/author/" + req.file.filename,
+  });
+
+  // generate salt to hash password
+  const SALT = await bcrypt.genSalt(10);
+  // now we set user password to hashed password
+  user.password = await bcrypt.hash(user.password, SALT);
+
+  user.save(function (err) {
+    if (err) {
+      return res.send(err);
+    }
+    res.send({ message: "Author Added Successfully!!" });
+  });
 });
 
 router.post("/login", async function (req, res) {
@@ -50,7 +77,7 @@ router.post("/login", async function (req, res) {
   }
 
   const body = req.body;
-  const user = await User.findOne({ email: body.email }).catch((err) =>
+  const user = await Author.findOne({ email: body.email }).catch((err) =>
     res.send({ error: "Error Logging In!", errorMessage: err })
   );
 
@@ -67,45 +94,18 @@ router.post("/login", async function (req, res) {
   }
 });
 
-router.post("/signup", upload, async function (req, res) {
-  if (!(req.body.email && req.body.password)) {
-    return res.status(400).send({ error: "Data not formatted properly" });
-  }
-
-  var user = new User({
-    name: req.body.name,
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
-    profileImage: req.file.filename,
-    profileImagePath: "profile/user" + req.file.filename,
-  });
-
-  // generate salt to hash password
-  const SALT = await bcrypt.genSalt(10);
-  // now we set user password to hashed password
-  user.password = await bcrypt.hash(user.password, SALT);
-
-  user.save(function (err) {
-    if (err) {
-      return res.send(err);
-    }
-    res.send({ message: "User Added Successfully!!" });
-  });
-});
-
 router.get("/:id", (req, res) => {
-  User.findById(req.params.id, (err, user) => {
+  Author.findById(req.params.id, (err, author) => {
     if (err) {
       return res.send({ error: err });
     }
-    if (user !== null) res.send({ user: user });
-    else res.send({ error: "No User found of this ID!" });
+    if (author !== null) res.send({ author: author });
+    else res.send({ error: "No Author Found of this ID!" });
   });
 });
 
-router.post("/:id/update", (req, res) => {
-  User.findById(req.params.id, function (err, user) {
+router.post("/:id/update", function (req, res) {
+  Author.findById(req.params.id, function (err, user) {
     if (err) {
       return res.send(err);
     }
@@ -116,12 +116,12 @@ router.post("/:id/update", (req, res) => {
       if (err) {
         return res.send(err);
       }
-      res.send({ message: "User Updated Successfully!!" });
+      res.send({ message: "Author Updated Successfully!!" });
     });
   });
 });
 
-router.delete("/:id/delete/", (req, res) => {
+router.delete("/:id/delete", (req, res) => {
   const userId = req.params.id;
   User.findOneAndRemove(userId)
     .exec()

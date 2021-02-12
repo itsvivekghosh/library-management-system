@@ -1,0 +1,5 @@
+<% books.forEach(book => {%>
+    <a href="/books/<%= book.id %>">
+        <img class="book-cover" src="uploads/<%= book.coverPath %>" alt="image-<%= book.id %>" width="260" height="260">
+    </a>
+<%})%>
