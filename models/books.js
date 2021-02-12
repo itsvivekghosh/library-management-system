@@ -9,14 +9,33 @@ var bookSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.ObjectId, // Author ID
     required: true,
+    ref: "Author",
+  },
+  description: {
+    type: String,
+    required: true,
   },
   isbn: {
     type: String,
-    default: "Not Available",
+    required: true,
+  },
+  publishDate: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  pagesCounts: {
+    type: Number,
+    required: true,
   },
   issued: {
     type: Boolean,
     required: false,
+    default: false,
   },
   coverName: {
     type: String,

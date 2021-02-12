@@ -11,6 +11,7 @@ router.get("/", async (req, res) => {
     authors = await Author.find().sort({ createdAt: "desc" }).limit(10).exec();
   } catch {
     books = [];
+    authors = [];
   }
   res.render("home.ejs", {
     books: books,

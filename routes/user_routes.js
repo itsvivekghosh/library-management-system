@@ -32,19 +32,28 @@ const upload = multer({
   limits: { fileSize: 1000000 },
 }).single("profileImage");
 
-router.get("/", function (req, res) {
-  var query = req.query;
-  var cb = resCb.bind({ res: res });
-  if (query.hasOwnProperty("name")) {
-    User.findByName(query.name, cb);
-  } else if (query.hasOwnProperty("username")) {
-    User.findByUsername(query.username, cb);
-  } else {
-    User.find(cb);
+router.get("/", async (req, res) => {
+  let searchOptions = {};
+
+  if (req.query.name !== null && req.query.name !== "") {
+    searchOptions.name = new RegExp(req.query.name, "i");
+  }
+  try {
+    const users = await User.find(searchOptions);
+    res.render("containers/users/userIndex", {
+      users: users,
+      searchOptions: req.query,
+    });
+  } catch {
+    res.redirect("/");
   }
 });
 
-router.post("/login", async function (req, res) {
+router.get("/signin", (_, res) => {
+  res.render("containers/users/userSignIn", { user: new User() });
+});
+
+router.post("/signin", async (req, res) => {
   if (!(req.body.email && req.body.password)) {
     return res.status(400).send({ error: "Data not formatted properly" });
   }
@@ -65,6 +74,10 @@ router.post("/login", async function (req, res) {
   } else {
     res.status(401).json({ error: "User does not exist" });
   }
+});
+
+router.get("/signup", (_, res) => {
+  res.render("containers/users/userSignUp", { user: new User() });
 });
 
 router.post("/signup", upload, async function (req, res) {

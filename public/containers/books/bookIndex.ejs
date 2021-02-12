@@ -1,0 +1,25 @@
+<h2 class="page-header">Search Books</h2>
+<form action="/book" method="GET">
+<div class="form-row">
+    <div class="form-item">
+        <label for="title">Title</label>
+        <input type="text" placeholder="Title" name="title" value="<%= searchOptions.title%>">
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-item">
+        <label for="title">Published After</label>
+        <input type="date" name="publishedAfter" value="<%= searchOptions.publishedAfter%>">
+    </div>
+
+    <div class="form-item">
+        <label for="title">Published Before</label>
+        <input type="date" name="publishedBefore" value="<%= searchOptions.publishedBefore%>">
+    </div>
+</div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+<br>
+<%- include("bookGrid.ejs", {
+    books: books
+}) %>

@@ -32,16 +32,25 @@ const upload = multer({
   limits: { fileSize: 1000000 },
 }).single("profileImage");
 
-router.get("/", (req, res) => {
-  var query = req.query;
-  var cb = resCb.bind({ res: res });
-  if (query.hasOwnProperty("name")) {
-    Author.findByName(query.name, cb);
-  } else if (query.hasOwnProperty("username")) {
-    Author.findByUsername(query.username, cb);
-  } else {
-    Author.find(cb);
+router.get("/", async (req, res) => {
+  let searchOptions = {};
+
+  if (req.query.authorName !== null && req.query.authorName !== "") {
+    searchOptions.authorName = new RegExp(req.query.authorName, "i");
   }
+  try {
+    const authors = await Author.find(searchOptions);
+    res.render("containers/authors/authorIndex", {
+      authors: authors,
+      searchOptions: req.query,
+    });
+  } catch {
+    res.redirect("/");
+  }
+});
+
+router.get("/signup", (req, res) => {
+  res.render("containers/authors/authorSignUp", { author: new Author() });
 });
 
 router.post("/signup", upload, async function (req, res) {
@@ -71,7 +80,11 @@ router.post("/signup", upload, async function (req, res) {
   });
 });
 
-router.post("/login", async function (req, res) {
+router.get("/signin", (req, res) => {
+  res.render("containers/authors/authorLogin", { author: new Author() });
+});
+
+router.post("/signin", async function (req, res) {
   if (!(req.body.email && req.body.password)) {
     return res.status(400).send({ error: "Data not formatted properly" });
   }

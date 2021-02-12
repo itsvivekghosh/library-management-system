@@ -1,0 +1,8 @@
+<h2 class="page-header">Add Details:</h2>
+<form action="/book/add" method="POST" enctype="multipart/form-data">
+  <%- include('bookFormField') %>
+  <div class="form-row form-row-end btn-row">
+    <a class="btn btn-danger" href="/book">Cancel</a>
+    <button class="btn btn-primary" type="submit">Create</button>
+  </div>
+</form>

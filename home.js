@@ -1,9 +1,12 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config({ path: ".env" });
+}
+
 var mongoose = require("mongoose");
 var express = require("express");
 var expressLayout = require("express-ejs-layouts");
 var methodOverride = require("method-override");
 var bodyparser = require("body-parser");
-require("dotenv/config");
 
 var router = express.Router();
 
@@ -38,10 +41,12 @@ mongoose
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then(() =>
-    console.log(`Connected to Database: ${process.env.DATABASE_NAME}`)
-  )
-  .catch((err) => console.log(err));
+  .then(() => {
+    console.log(`Connected to Database: ${process.env.DATABASE_NAME}`);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 app.use("/", index_routes);
 app.use("/book", book_routes);

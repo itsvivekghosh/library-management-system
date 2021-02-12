@@ -2,32 +2,41 @@ var express = require("express");
 const multer = require("multer");
 var router = express.Router();
 var Book = require("../models/books");
+var Author = require("../models/author");
 var path = require("path");
 
-router.get("/", function (req, res) {
-  var query = req.query;
-  var cb = resCb.bind({ res: res });
-  if (query.hasOwnProperty("title")) {
-    Book.findByTitle(query.title, cb);
-  } else if (query.hasOwnProperty("author")) {
-    Book.findByAuthor(query.author, cb);
-  } else if (query.hasOwnProperty("isbn")) {
-    Book.findByIsbn(query.isbn, cb);
-  } else if (query.hasOwnProperty("issued")) {
-    Book.findByIssued(query.issued, cb);
-  } else {
-    Book.find(cb);
+router.get("/", async (req, res) => {
+  let query = Book.find();
+
+  if (req.query.title != null && req.query.title != "") {
+    query = query.regex("title", new RegExp(req.query.title, "i"));
+  }
+  if (req.query.publishedBefore != null && req.query.publishedBefore != "") {
+    query = query.lte("publishDate", req.query.publishedBefore);
+  }
+  if (req.query.publishedAfter != null && req.query.publishedAfter != "") {
+    query = query.gte("publishDate", req.query.publishedAfter);
+  }
+  try {
+    const books = await query.exec();
+    res.render("containers/books/bookIndex", {
+      books: books,
+      searchOptions: req.query,
+    });
+  } catch {
+    res.redirect("/");
   }
 });
 
-router.get("/:id", function (req, res) {
-  Book.findById(req.params.id, resCb.bind({ res: res }));
+// New Book Route
+router.get("/add", (_, res) => {
+  renderNewPage(res, new Book());
 });
 
 const Storage = multer.diskStorage({
   destination: "./public/uploads/covers/",
   // By default, multer removes file extensions so let's add them back
-  filename: function (req, file, cb) {
+  filename: function (_, file, cb) {
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
@@ -54,10 +63,12 @@ router.post("/add", upload, function (req, res) {
   var book = new Book({
     title: req.body.title,
     author: req.body.author,
+    description: req.body.description,
+    publishDate: req.body.publishDate,
+    pagesCounts: req.body.pagesCounts,
     isbn: req.body.isbn,
     coverPath: "covers/" + req.file.filename,
     coverName: req.file.filename,
-    issued: req.body.issued,
   });
   book.save(function (error) {
     if (error) {
@@ -65,6 +76,10 @@ router.post("/add", upload, function (req, res) {
     }
     res.send({ message: "Book Added Successfully!!" });
   });
+});
+
+router.get("/:id", function (req, res) {
+  Book.findById(req.params.id, resCb.bind({ res: res }));
 });
 
 router.post("/:id", function (req, res) {
@@ -106,8 +121,32 @@ function resCb(err, data) {
   this.res.json(data);
 }
 
-function transferMessage(res, message) {
-  return { res: message };
+async function renderFormPage(res, book, form, hasError = false) {
+  try {
+    const authors = await Author.find({});
+    const params = {
+      authors: authors,
+      book: book,
+    };
+    if (hasError) {
+      if (form === "editBook") {
+        params.errorMessage = "Error Updating Book";
+      } else {
+        params.errorMessage = "Error Creating Book";
+      }
+    }
+    res.render(`containers/books/${form}`, params);
+  } catch {
+    res.redirect("/book");
+  }
+}
+
+async function renderNewPage(res, book, hasError = false) {
+  renderFormPage(res, book, "createBook", hasError);
+}
+
+async function renderEditPage(res, book, hasError = false) {
+  renderFormPage(res, book, "editBook", hasError);
 }
 
 module.exports = router;

@@ -1,0 +1,51 @@
+<div class="main-container">
+  <div class="form-row">
+    <div class="form-item">
+      <label>Title</label>
+      <input type="text" name="title" placeholder="Title" value="<%= book.title %>">
+    </div>
+    <div class="form-item">
+      <label>Author</label>
+        <select name="author">
+          <% authors.forEach(author => { %>
+            <% if (author.id === book.author) { %>
+              <option selected label="<%= author.authorName %>" value="<%= author.id %>">
+            <% } else { %>
+              <option label="<%= author.authorName %>" value="<%= author.id %>">
+            <% } %>
+          <% }) %>
+        </select>
+    </div>
+  </div>
+  <div class="form-row">
+      <div class="form-item">
+        <label>Publish Date</label>
+        <input type="date" name="publishDate" placeholder="Publish Date"
+            value="<%= book.publishDate == null ? '' 
+            : 
+            book.publishDate.toISOString().split('T')[0] %>">
+      </div>
+      <div class="form-item">
+        <label>Pages Count</label>
+        <input type="number" name="pagesCounts" placeholder="Pages Count" 
+        min="1" value="<%= book.pagesCounts %>">
+      </div>
+      <div class="form-item">
+        <label>ISBN:</label>
+        <input type="text" name="isbn" placeholder="ISBN" value="<%= book.isbn %>">
+      </div>
+  </div>
+  <div class="form-row">
+      <div class="form-item form-item-no-grow">
+        <label>Book Cover</label>
+        <input type="file" name="cover" placeholder="Cover" class="book-cover">
+      </div>
+
+      <div class="form-item">
+        <label>Description</label>
+        <textarea name="description">
+          <%= book.description %>
+        </textarea>
+      </div>
+  </div>
+</div>
