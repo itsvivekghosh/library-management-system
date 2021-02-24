@@ -18,6 +18,7 @@ var bookSchema = new mongoose.Schema({
   isbn: {
     type: String,
     required: true,
+    unique: true,
   },
   publishDate: {
     type: Date,

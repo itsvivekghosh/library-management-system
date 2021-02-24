@@ -1,0 +1,41 @@
+<div>
+    <div>
+        <img src="../../uploads/<%= book.coverPath %>" alt="book-cover" width="250" height="250" />
+    </div>
+    <div>
+        <%= book.title %>
+    </div>
+    <div>
+        Written By: <%= bookAuthor.authorName %>
+    </div>
+    <div>
+        <%= book.description %>
+    </div>
+    <div>
+        <%= book.pagesCounts %>
+    </div>
+    <br />
+</div>
+
+<% if (moreBooks.length > 0) { %>
+<div>
+    <div>
+        <div>
+           <img 
+            src="../../uploads/<%= bookAuthor.profileImagePath %>" 
+            alt="<%= bookAuthor.authorName %>-profile-image" width="100" height="100" 
+           />
+        </div>
+        More By: <%= bookAuthor.authorName %>
+    </div>
+    <div>
+        <% moreBooks.forEach(book => { %>
+            <div>
+                <a href="/book/<%= book.id %>" style="text-decoration: none;">
+                    <%= book.title %>
+                </a>
+            </div>
+        <% }) %>
+    </div>
+</div>
+<% } %>

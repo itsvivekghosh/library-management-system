@@ -1,0 +1,13 @@
+<div>
+    <h2 class="page-header">
+        Update User:
+    </h2>
+    <div>
+        <form action="/user/<%= user.id %>/update" method="POST" enctype="application/x-www-form-urlencoded">
+            <%- include('signUpForm') %>
+            <a href="/user/<%= user.id %>" class="btn btn-danger">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</div>
+

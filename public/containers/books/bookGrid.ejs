@@ -1,8 +1,16 @@
-<div class="book-grid">
-    <% books.forEach(book => {%>
-        <a href="/book/<%= book.id %>">
-            <img alt="book cover" src="uploads/<%= book.coverPath %>" width="250" height="250">
-            <div><%=book.title%></div>
-        </a>
-    <%})%>
+<div>
+    <div>
+        <p>
+            <b>Latest Releases: </b>
+            <br/>
+        </p>
+    </div>
+    <div class="book-grid">
+        <% books.forEach(book => {%>
+            <a href="/book/<%= book.id %>">
+                <img alt="book cover" src="uploads/<%= book.coverPath %>" width="250" height="250">
+                <div><%=book.title%></div>
+            </a>
+        <%})%>
+    </div>
 </div>

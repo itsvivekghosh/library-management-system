@@ -2,12 +2,14 @@ var mongoose = require("mongoose");
 
 var issueSchema = new mongoose.Schema({
   book_id: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.ObjectId, // Book ID
     required: true,
+    ref: "Book",
   },
   user_id: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.ObjectId, // User ID
     required: true,
+    ref: "User",
   },
   issue_date: {
     type: Date,

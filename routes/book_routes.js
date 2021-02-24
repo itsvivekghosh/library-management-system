@@ -6,7 +6,7 @@ var Author = require("../models/author");
 var path = require("path");
 
 router.get("/", async (req, res) => {
-  let query = Book.find();
+  let query = Book.find().sort({ createdAt: -1 });
 
   if (req.query.title != null && req.query.title != "") {
     query = query.regex("title", new RegExp(req.query.title, "i"));
@@ -74,12 +74,44 @@ router.post("/add", upload, function (req, res) {
     if (error) {
       return res.send(error);
     }
+    Author.findById(req.body.author, function (err, author) {
+      if (err) {
+        return res.send({ error: "Author Not Found!" });
+      }
+      author["noOfBooks"] += 1;
+
+      author.save(function (err) {
+        if (err) {
+          return res.send(err);
+        }
+      });
+    });
     res.send({ message: "Book Added Successfully!!" });
   });
 });
 
 router.get("/:id", function (req, res) {
-  Book.findById(req.params.id, resCb.bind({ res: res }));
+  Book.findById(req.params.id, async (err, book) => {
+    if (err) {
+      res.render("containers/layouts/errorPage", {
+        errorMessage: "No Book Found",
+        statusMessage: 404,
+      });
+    }
+    const author = await Author.findById(book.author);
+    const moreBooks = await Book.find({
+      author: book.author,
+      _id: { $ne: req.params.id },
+    })
+      .limit(4)
+      .sort({ createdAt: -1 });
+    if (book !== null)
+      res.render("containers/books/bookDetails", {
+        book: book,
+        bookAuthor: author,
+        moreBooks: moreBooks,
+      });
+  }).catch((err) => console.log(err));
 });
 
 router.post("/:id", function (req, res) {
@@ -113,13 +145,6 @@ router.delete("/:id/delete/", (req, res) => {
       return res.send({ error: err });
     });
 });
-
-function resCb(err, data) {
-  if (err) {
-    this.res.send(err);
-  }
-  this.res.json(data);
-}
 
 async function renderFormPage(res, book, form, hasError = false) {
   try {

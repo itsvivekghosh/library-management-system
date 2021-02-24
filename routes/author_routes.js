@@ -2,9 +2,11 @@ var express = require("express");
 var router = express.Router();
 var multer = require("multer");
 var Author = require("./../models/author");
+var Book = require("./../models/books");
 var path = require("path");
 const bcrypt = require("bcrypt");
 require("dotenv/config");
+router.use(express.json());
 
 const Storage = multer.diskStorage({
   destination: "./public/uploads/profile/author/",
@@ -39,10 +41,12 @@ router.get("/", async (req, res) => {
     searchOptions.authorName = new RegExp(req.query.authorName, "i");
   }
   try {
-    const authors = await Author.find(searchOptions);
+    const authors = await Author.find(searchOptions).sort({ joined: -1 });
+    const moreAuthors = await Author.find().limit(4).sort({ joined: -1 });
     res.render("containers/authors/authorIndex", {
       authors: authors,
       searchOptions: req.query,
+      moreAuthors: moreAuthors,
     });
   } catch {
     res.redirect("/");
@@ -50,7 +54,10 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/signup", (req, res) => {
-  res.render("containers/authors/authorSignUp", { author: new Author() });
+  res.render("containers/authors/authorSignUp", {
+    author: new Author(),
+    formType: "new",
+  });
 });
 
 router.post("/signup", upload, async function (req, res) {
@@ -108,30 +115,66 @@ router.post("/signin", async function (req, res) {
 });
 
 router.get("/:id", (req, res) => {
-  Author.findById(req.params.id, (err, author) => {
+  Author.findById(req.params.id, async (err, author) => {
     if (err) {
-      return res.send({ error: err });
+      return res.render("layouts/errorPage", {
+        errorMessage: "No Author found",
+        statusMessage: 404,
+      });
     }
-    if (author !== null) res.send({ author: author });
+    var searchParams = {
+      author: req.params.id,
+    };
+    var books = await Book.find(searchParams).sort({ createdAt: -1 });
+    if (author !== null)
+      res.render("containers/authors/booksByAuthor", {
+        author: author,
+        books: books,
+      });
     else res.send({ error: "No Author Found of this ID!" });
   });
 });
 
-router.post("/:id/update", function (req, res) {
-  Author.findById(req.params.id, function (err, user) {
+router.get("/:id/update", (req, res) => {
+  var authorId = req.params.id;
+  Author.findById(authorId, async (err, author) => {
     if (err) {
-      return res.send(err);
+      return res.render("layouts/errorPage", {
+        errorMessage: "No Author found",
+        statusMessage: 404,
+      });
     }
-    for (prop in req.body) {
-      user[prop] = req.body[prop];
+    if (author !== null)
+      res.render("containers/authors/authorUpdate", {
+        author: author,
+        formType: "update",
+      });
+    else {
+      res.send({ error: "No Author Found of this ID!" });
     }
-    user.save(function (err) {
-      if (err) {
-        return res.send(err);
-      }
-      res.send({ message: "Author Updated Successfully!!" });
-    });
   });
+});
+
+router.post("/:id/update", async (req, res) => {
+  var author;
+
+  try {
+    author = await Author.findById(req.params.id);
+    author.authorName = req.body.authorName;
+    author.username = req.body.username;
+    await author.save();
+    res.redirect(`/author/${author.id}`);
+  } catch {
+    if (author === null) {
+      res.redirect("/");
+    } else {
+      res.render("containers/authors/authorUpdate", {
+        errorMessage: "Error Updating Author",
+        author: author,
+        formType: "update",
+      });
+    }
+  }
 });
 
 router.delete("/:id/delete", (req, res) => {

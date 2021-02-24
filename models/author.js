@@ -5,6 +5,10 @@ var authorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  description: {
+    type: String,
+    required: false,
+  },
   email: {
     type: String,
     required: true,
@@ -27,9 +31,14 @@ var authorSchema = new mongoose.Schema({
     type: String,
   },
   noOfBooks: {
-    type: String,
+    type: Number,
     default: 0,
     required: false,
+  },
+  joined: {
+    type: Date,
+    required: false,
+    default: Date.now,
   },
 });
 

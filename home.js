@@ -6,16 +6,18 @@ var mongoose = require("mongoose");
 var express = require("express");
 var expressLayout = require("express-ejs-layouts");
 var methodOverride = require("method-override");
-var bodyparser = require("body-parser");
 
 var router = express.Router();
 
 router.use(express.static(__dirname + "./public/"));
 var app = express();
 
-var bodyParser = require("body-parser");
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 const PORT = 3000;
 
 app.set("view engine", "ejs");
@@ -25,13 +27,13 @@ app.set("layout", "layouts/layout");
 
 app.use(expressLayout);
 app.use(express.static("public"));
-app.use(bodyparser.urlencoded({ limit: "10mb", extended: false }));
 
 // Routes
 var book_routes = require("./routes/book_routes");
 var user_routes = require("./routes/user_routes");
 var issue_routes = require("./routes/issue_routes");
 var author_routes = require("./routes/author_routes");
+var admin_routes = require("./routes/admin_routes");
 var index_routes = require("./routes/index_routes");
 
 // connecting to mongoose mongodb
@@ -52,6 +54,7 @@ app.use("/", index_routes);
 app.use("/book", book_routes);
 app.use("/user", user_routes);
 app.use("/author", author_routes);
+app.use("/admin", admin_routes);
 app.use("/issue", issue_routes);
 
 app.listen(PORT, () => {

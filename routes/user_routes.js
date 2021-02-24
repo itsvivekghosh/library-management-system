@@ -108,12 +108,38 @@ router.post("/signup", upload, async function (req, res) {
 });
 
 router.get("/:id", (req, res) => {
-  User.findById(req.params.id, (err, user) => {
+  User.findById(req.params.id, async (err, user) => {
     if (err) {
-      return res.send({ error: err });
+      return res.render("layouts/errorPage", {
+        errorMessage: "No User found",
+        statusMessage: 404,
+      });
     }
-    if (user !== null) res.send({ user: user });
-    else res.send({ error: "No User found of this ID!" });
+    if (user !== null)
+      res.render("containers/users/userHome", {
+        user: user,
+      });
+    else res.send({ error: "No Author Found of this ID!" });
+  });
+});
+
+router.get("/:id/update", async (req, res) => {
+  var userId = req.params.id;
+  User.findById(userId, async (err, user) => {
+    if (err) {
+      return res.render("layouts/errorPage", {
+        errorMessage: "No User found",
+        statusMessage: 404,
+      });
+    }
+    if (user !== null)
+      res.render("containers/users/userUpdate", {
+        user: user,
+        formType: "update",
+      });
+    else {
+      res.send({ error: "No Author Found of this ID!" });
+    }
   });
 });
 
@@ -129,7 +155,7 @@ router.post("/:id/update", (req, res) => {
       if (err) {
         return res.send(err);
       }
-      res.send({ message: "User Updated Successfully!!" });
+      res.redirect(`/user/${user.id}`);
     });
   });
 });

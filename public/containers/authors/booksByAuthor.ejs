@@ -1,0 +1,49 @@
+<div>
+    <div>
+        <div>
+            <h2>Books By: <%= author.authorName %></h2>
+        </div>
+        <div>
+            <div class="book-grid">
+                <% books.forEach(book => { %>
+                    <a href="/book/<%= book.id %>">
+                        <img
+                         alt="book cover" src="../../uploads/<%= book.coverPath %>"
+                         width="250" height="250"
+                        />
+                        <div><%= book.title %></div>
+                    </a>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div>
+            About Author:
+        </div>
+        <br />
+        <div>
+            <div>
+                <div>
+                    <img 
+                        alt="book cover" src="../../uploads/<%= author.profileImagePath %>"
+                        width="100" height="100"
+                    />
+                </div>
+                <p>
+                    <%= author.authorName %>
+                </p>
+            </div>
+            <div>
+                <p>
+                    Description: <%= author.description %>
+                </p>
+            </div>
+            <div>
+                <p>
+                    Number of Books Released: <%= author.noOfBooks %>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
